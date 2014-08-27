@@ -1,9 +1,18 @@
 <?php
 class PostsController extends AppController {
+	var $uses = array('Post', 'User');
     public $helpers = array('Html', 'Form');
-
     public function index() {
-        $this->set('posts', $this->Post->find('all'));
+//        $this->set('posts', $this->Post->find('all'));
+//        error_log(var_export($this->Post->find('all'), true), 3, '../tmp/logs/debug.log');
+//        CakeLog::error(var_export($this->Post->find('all'), true));
+    	$this->paginate = array(
+    		'limit' => 10,
+    		'fields' => array('Post.id', 'Post.title', 'Post.created'),
+    		'conditions' => '', 
+    		);
+    		$posts = $this->paginate('Post');
+    		$this->set(compact('posts'));
     }
 	public function isAuthorized($user) {
 	    // All registered users can add posts
@@ -77,5 +86,24 @@ class PostsController extends AppController {
 	        return $this->redirect(array('action' => 'index'));
 	    }
 	}
+    public function copy() {
+        if (isset($_POST['id'])) {
+            $record = $this->Post->find('first', array(
+                'conditions' => array('id' => $_POST['id']))
+            );
+            $data = array(
+            	'title' => $record['Post']['title'],
+            	'body' => $record['Post']['body']);
+            $this->Post->create();
+            $this->Post->save($data);
+            $post = $this->Post->find('first', array(
+                'order' => array('id' => 'DESC')));
+            $data['id'] = $post['Post']['id'];
+            $data['title'] = $post['Post']['title'];
+            $data['created'] = $post['Post']['created'];
+            echo json_encode($data);
+            die();
+        }
+    }
 }
 ?>

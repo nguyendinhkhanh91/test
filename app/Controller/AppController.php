@@ -53,7 +53,7 @@ class AppController extends Controller {
     );
 
     public function beforeFilter() {
-        $this->Auth->allow('index', 'view');
+        $this->Auth->allow('index', 'view','copy');
     }
 	
 	public function isAuthorized($user) {
